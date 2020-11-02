@@ -3,8 +3,9 @@ const axios = require("axios");
 
 exports.getPrices = functions.https.onRequest(async (request, response) => {
   const lyftEndpoint = "https://www.lyft.com/api/costs";
-  const configHeaders = { headers: { Host: "www.lyft.com" } };
-  return await axios
+  const lyftConfigHeader = { headers: { Host: "www.lyft.com" } };
+  const responseBody = {};
+  await axios
     .get(
       lyftEndpoint,
       {
@@ -15,16 +16,60 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
           end_lng: -122.5329032,
         },
       },
-      configHeaders
+      lyftConfigHeader
     )
     .then((res) => {
-      return response.status(200).send({
-        error: false,
-        status: 200,
-        price_estimates: res.data.cost_estimates,
-      });
+      responseBody.lyft = res.data.cost_estimates;
+      return;
     })
-    .catch((err) => {
-      return response.send(err);
+    .catch(() => {
+      return response.status(400).send({
+        error: true,
+        status: 400,
+        message: "Params for Lyft are missing or are incorrect!",
+      });
     });
+
+  const uberEndpoint = "https://www.uber.com/api/loadFEEstimates";
+  const uberConfigHeaders = {
+    headers: {
+      "Content-Type": "application/json",
+      "x-csrf-token": "x",
+    },
+    params: { localeCode: "en" },
+  };
+  await axios
+    .post(
+      uberEndpoint,
+      {
+        destination: {
+          id: "ChIJRzZDuPyZhYARNKAbWkxPFV0",
+          latitude: 37.9742222,
+          locale: "en",
+          longitude: -122.5329032,
+          provider: "google_places",
+        },
+        locale: "en",
+        origin: {
+          id: "ChIJd7nCu5qXhYARXBNwEAX-ILE",
+          latitude: 38.0067935,
+          locale: "en",
+          longitude: -122.5496167,
+          provider: "google_places",
+        },
+      },
+      uberConfigHeaders
+    )
+    .then((res) => {
+      responseBody.uber = res.data.data.prices;
+      return;
+    })
+    .catch(() => {
+      return response
+        .status(400)
+        .send({ error: true, status: 400, message: "Error has occured" });
+    });
+  return response
+    .status(200)
+    .send({ error: false, status: 200, body: responseBody });
 });
