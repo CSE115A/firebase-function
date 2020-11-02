@@ -19,7 +19,18 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
       lyftConfigHeader
     )
     .then((res) => {
-      responseBody.lyft = res.data.cost_estimates;
+      responseBody.lyft = [];
+      const costEstimates = res.data.cost_estimates;
+      for (cost in costEstimates) {
+        let item = costEstimates[cost];
+        let dataToInput = {
+          displayName: item.display_name,
+          price: `$${item.estimated_cost_cents_min / 100}-${
+            item.estimated_cost_cents_max / 100
+          }`,
+        };
+        responseBody.lyft.push(dataToInput);
+      }
       return;
     })
     .catch(() => {
@@ -43,7 +54,6 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
       uberEndpoint,
       {
         destination: {
-          id: "ChIJRzZDuPyZhYARNKAbWkxPFV0",
           latitude: 37.9742222,
           locale: "en",
           longitude: -122.5329032,
@@ -51,7 +61,6 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
         },
         locale: "en",
         origin: {
-          id: "ChIJd7nCu5qXhYARXBNwEAX-ILE",
           latitude: 38.0067935,
           locale: "en",
           longitude: -122.5496167,
@@ -61,7 +70,15 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
       uberConfigHeaders
     )
     .then((res) => {
-      responseBody.uber = res.data.data.prices;
+      const data = res.data.data.prices;
+      responseBody.uber = [];
+      for (item in data) {
+        let dataToInput = {
+          displayName: data[item].vehicleViewDisplayName,
+          price: data[item].fareString,
+        };
+        responseBody.uber.push(dataToInput);
+      }
       return;
     })
     .catch(() => {
