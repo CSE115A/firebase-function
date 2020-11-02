@@ -16,7 +16,9 @@ jobs:
         with:
           node-version: 14.11.0
       - name: Install Dependencies
-        run: yarn install --frozen-lockfile
+        run: |
+            cd functions
+            yarn install --frozen-lockfile
       - name: Lint
         run: yarn lint
   
@@ -31,7 +33,9 @@ jobs:
         with:
           node-version: 14.11.0
       - name: Install Dependencies 
-        run: yarn install --frozen-lockfile
+        run: |
+            cd functions
+            yarn install --frozen-lockfile
       - name: Deploying to Firebase 
         run: yarn deploy --token $token 
         env: 
