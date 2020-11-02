@@ -20,7 +20,9 @@ jobs:
             cd functions
             yarn install --frozen-lockfile
       - name: Lint
-        run: yarn lint
+        run: |
+            cd functions
+            yarn lint
   
   auto-deploy:
     runs-on: ubuntu-latest 
