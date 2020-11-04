@@ -85,7 +85,7 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
       }
       return response
         .status(200)
-        .send({ error: false, status: 200, body: responseBody });
+        .send({ error: false, status: 200, message: responseBody });
     })
     .catch(() => {
       return response.status(400).send({
