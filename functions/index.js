@@ -2,6 +2,11 @@ const functions = require("firebase-functions");
 const axios = require("axios");
 
 exports.getPrices = functions.https.onRequest(async (request, response) => {
+  const startingLatitude = request.query.start_lat;
+  const startingLongitude = request.query.start_lng;
+  const endLatitude = request.query.end_lat;
+  const endLongitude = request.query.end_lng;
+
   const lyftEndpoint = functions.config().getprices.lyft_endpoint;
   const lyftConfigHeader = { headers: { Host: "www.lyft.com" } };
   const responseBody = {};
@@ -10,10 +15,10 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
       lyftEndpoint,
       {
         params: {
-          start_lat: 38.0067935,
-          start_lng: -122.5496167,
-          end_lat: 37.9742222,
-          end_lng: -122.5329032,
+          start_lat: startingLatitude,
+          start_lng: startingLongitude,
+          end_lat: endLatitude,
+          end_lng: endLongitude,
         },
       },
       lyftConfigHeader
@@ -44,30 +49,30 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
   if (lyftResponse !== undefined) return;
 
   const uberEndpoint = functions.config().getprices.uber_endpoint;
+  const uberParams = {
+    destination: {
+      latitude: parseFloat(endLatitude),
+      locale: "en",
+      longitude: parseFloat(endLongitude),
+      provider: "google_places",
+    },
+    locale: "en",
+    origin: {
+      latitude: parseFloat(startingLatitude),
+      locale: "en",
+      longitude: parseFloat(startingLongitude),
+      provider: "google_places",
+    },
+  };
   const uberConfigHeaders = {
     headers: {
       "Content-Type": "application/json",
-      "x-csrf-token": "91f17a77-f8a6-46f9-a5a5-8be7ad3f7c2c",
+      "x-csrf-token": "x",
     },
     params: { localeCode: "en" },
   };
-
   await axios
-    .post(
-      uberEndpoint,
-      {
-        destination: {
-          latitude: 37.9742222,
-          longitude: -122.5329032,
-        },
-        locale: "en",
-        origin: {
-          latitude: 38.0067935,
-          longitude: -122.5496167,
-        },
-      },
-      uberConfigHeaders
-    )
+    .post(uberEndpoint, uberParams, uberConfigHeaders)
     .then((res) => {
       const data = res.data.data.prices;
       responseBody.uber = [];
