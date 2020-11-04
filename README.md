@@ -25,4 +25,4 @@ Can install these by navigating to the [`/functions`](functions/) directory and 
 Within the [`/functions`](functions/) directory, run: 
 
 * `yarn serve` to begin an emulator UI suite on `localhost:4000`
-  * As per the [`firebase.json`](firebase.json) file, all the functions will be hosted off of `localhost:5000`
+  * As per the [`firebase.json`](firebase.json#L8-L10) file, all the functions will be hosted off of `localhost:5000`
