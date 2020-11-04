@@ -2,10 +2,10 @@ const functions = require("firebase-functions");
 const axios = require("axios");
 
 exports.getPrices = functions.https.onRequest(async (request, response) => {
-  const lyftEndpoint = "https://www.lyft.com/api/costs";
+  const lyftEndpoint = functions.config().getprices.lyft_endpoint;
   const lyftConfigHeader = { headers: { Host: "www.lyft.com" } };
   const responseBody = {};
-  await axios
+  const lyftResponse = await axios
     .get(
       lyftEndpoint,
       {
@@ -41,30 +41,29 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
       });
     });
 
-  const uberEndpoint = "https://www.uber.com/api/loadFEEstimates";
+  if (lyftResponse !== undefined) return;
+
+  const uberEndpoint = functions.config().getprices.uber_endpoint;
   const uberConfigHeaders = {
     headers: {
       "Content-Type": "application/json",
-      "x-csrf-token": "x",
+      "x-csrf-token": "91f17a77-f8a6-46f9-a5a5-8be7ad3f7c2c",
     },
     params: { localeCode: "en" },
   };
+
   await axios
     .post(
       uberEndpoint,
       {
         destination: {
           latitude: 37.9742222,
-          locale: "en",
           longitude: -122.5329032,
-          provider: "google_places",
         },
         locale: "en",
         origin: {
           latitude: 38.0067935,
-          locale: "en",
           longitude: -122.5496167,
-          provider: "google_places",
         },
       },
       uberConfigHeaders
@@ -79,14 +78,15 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
         };
         responseBody.uber.push(dataToInput);
       }
-      return;
+      return response
+        .status(200)
+        .send({ error: false, status: 200, body: responseBody });
     })
     .catch(() => {
-      return response
-        .status(400)
-        .send({ error: true, status: 400, message: "Error has occured" });
+      return response.status(400).send({
+        error: true,
+        status: 400,
+        message: "Error has occured with Uber",
+      });
     });
-  return response
-    .status(200)
-    .send({ error: false, status: 200, body: responseBody });
 });
