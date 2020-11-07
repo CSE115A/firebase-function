@@ -21,7 +21,7 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
           end_lng: endLongitude,
         },
       },
-      lyftConfigHeader
+      lyftConfigHeader,
     )
     .then((res) => {
       responseBody.lyft = [];

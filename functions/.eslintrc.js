@@ -1,22 +1,21 @@
-{
-  "parserOptions": {
+module.exports = {
+  parserOptions: {
     // Required for certain syntax usages
-    "ecmaVersion": 2017
+    ecmaVersion: 2017,
+    sourceType: "module",
   },
-  "plugins": [
-    "promise", "prettier"
-  ],
-  "extends": ["eslint:recommended", "plugin:prettier/recommended"],
-  "rules": {
+  plugins: ["promise", "prettier", "jest"],
+  extends: ["eslint:recommended", "plugin:prettier/recommended", "plugin:jest/recommended"],
+  rules: {
     "prettier/prettier": "error",
 
     "no-unused-vars": [
       "error",
       {
-        "args": "after-used",
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
-      }
+        args: "after-used",
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+      },
     ],
 
     // Removed rule "disallow the use of undeclared variables unless mentioned in /*global */ comments" from recommended eslint rules
@@ -32,7 +31,7 @@
     "array-callback-return": 1,
 
     // Require the use of === and !==
-    "eqeqeq": 2,
+    eqeqeq: 2,
 
     // Require using Error objects as Promise rejection reasons
     "prefer-promise-reject-errors": 2,
@@ -43,20 +42,17 @@
     // Require error handling in callbacks
     "handle-callback-err": 2,
 
-    // Warn against string concatenation with __dirname and __filename
-    "no-path-concat": 1,
-
     // Prefer using arrow functions for callbacks
     "prefer-arrow-callback": 1,
 
     // Return inside each then() to create readable and reusable Promise chains.
-    // Forces developers to return console logs and http calls in promises. 
+    // Forces developers to return console logs and http calls in promises.
     "promise/always-return": 2,
 
     //Enforces the use of catch() on un-returned promises
     "promise/catch-or-return": 2,
 
     // Warn against nested then() or catch() statements
-    "promise/no-nesting": 1
-  }
-}
+    "promise/no-nesting": 1,
+  },
+};
