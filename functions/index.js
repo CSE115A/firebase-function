@@ -1,74 +1,37 @@
 const functions = require("firebase-functions");
 const axios = require("axios");
+const { getLyftPrices } = require("./middleware/lyft");
 
 exports.getPrices = functions.https.onRequest(async (request, response) => {
-  const startingLatitude = request.query.start_lat;
-  const startingLongitude = request.query.start_lng;
-  const endLatitude = request.query.end_lat;
-  const endLongitude = request.query.end_lng;
-
-  const lyftEndpoint = functions.config().getprices.lyft_endpoint;
-  const lyftConfigHeader = { headers: { Host: "www.lyft.com" } };
+  const params = {
+    startingLatitude: request.query.start_lat,
+    startingLongitude: request.query.start_lng,
+    endLatitude: request.query.end_lat,
+    endLongitude: request.query.end_lng,
+  };
   const responseBody = {};
-  const lyftResponse = await axios
-    .get(
-      lyftEndpoint,
-      {
-        params: {
-          start_lat: startingLatitude,
-          start_lng: startingLongitude,
-          end_lat: endLatitude,
-          end_lng: endLongitude,
-        },
-      },
-      lyftConfigHeader,
-    )
-    .then((res) => {
-      responseBody.lyft = [];
-      const costEstimates = res.data.cost_estimates;
-      for (cost in costEstimates) {
-        let item = costEstimates[cost];
-        let dataToInput = {
-          displayName: item.display_name,
-          price: `$${item.estimated_cost_cents_min / 100}-${
-            item.estimated_cost_cents_max / 100
-          }`,
-        };
-        responseBody.lyft.push(dataToInput);
-      }
-      return;
-    })
-    .catch((err) => {
-      if (err.response.status === 400) {
-        return response.status(400).send({
-          error: true,
-          status: 400,
-          message: "Params for Lyft are missing or are incorrect!",
-        });
-      } else {
-        return response.status(500).send({
-          error: true,
-          status: 500,
-          message: err.response.data,
-        });
-      }
-    });
+  const lyftResponse = await getLyftPrices({
+    functions,
+    response,
+    params,
+    responseBody,
+  });
 
   if (lyftResponse !== undefined) return;
 
   const uberEndpoint = functions.config().getprices.uber_endpoint;
   const uberParams = {
     destination: {
-      latitude: parseFloat(endLatitude),
+      latitude: parseFloat(params.endLatitude),
       locale: "en",
-      longitude: parseFloat(endLongitude),
+      longitude: parseFloat(params.endLongitude),
       provider: "google_places",
     },
     locale: "en",
     origin: {
-      latitude: parseFloat(startingLatitude),
+      latitude: parseFloat(params.startingLatitude),
       locale: "en",
-      longitude: parseFloat(startingLongitude),
+      longitude: parseFloat(params.startingLongitude),
       provider: "google_places",
     },
   };
