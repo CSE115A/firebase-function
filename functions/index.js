@@ -38,12 +38,20 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
       }
       return;
     })
-    .catch(() => {
-      return response.status(400).send({
-        error: true,
-        status: 400,
-        message: "Params for Lyft are missing or are incorrect!",
-      });
+    .catch((err) => {
+      if (err.response.status === 400) {
+        return response.status(400).send({
+          error: true,
+          status: 400,
+          message: "Params for Lyft are missing or are incorrect!",
+        });
+      } else {
+        return response.status(500).send({
+          error: true,
+          status: 500,
+          message: err.response.data,
+        });
+      }
     });
 
   if (lyftResponse !== undefined) return;
@@ -75,6 +83,13 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
     .post(uberEndpoint, uberParams, uberConfigHeaders)
     .then((res) => {
       const data = res.data.data.prices;
+      if (data === undefined) {
+        return response.status(400).send({
+          error: true,
+          status: 400,
+          message: "Invalid Uber Params!",
+        });
+      }
       responseBody.uber = [];
       for (item in data) {
         let dataToInput = {
@@ -87,11 +102,11 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
         .status(200)
         .send({ error: false, status: 200, message: responseBody });
     })
-    .catch(() => {
-      return response.status(400).send({
+    .catch((err) => {
+      return response.status(500).send({
         error: true,
-        status: 400,
-        message: "Error has occured with Uber",
+        status: 500,
+        message: err.response.data,
       });
     });
 });
