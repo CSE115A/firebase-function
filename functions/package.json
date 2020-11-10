@@ -3,7 +3,7 @@
   "description": "Cloud Functions for Firebase",
   "scripts": {
     "lint": "eslint .",
-    "test": "jest --watch",
+    "test": "jest --watch --coverage",
     "test:once": "jest",
     "test:ci": "jest --coverage --ci --color --runInBand --silent",
     "serve": "firebase emulators:start --only functions",
