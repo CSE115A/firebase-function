@@ -38,7 +38,8 @@ We have the following environment variables:
 ```json 
 {
     "uber_endpoint": "endpoint",
-    "lyft_endpoint": "endpoint"
+    "lyft_endpoint": "endpoint",
+    "auth_token": "token"
 }
 ```
 
@@ -51,7 +52,7 @@ These actual values of these can be obtained by running:
 ### Request 
 
 ```bash
-curl http://localhost:5000/cse115a/us-central1/getPrices\?start_lat\=START_LAT\&start_lng\=START_LNG\&end_lat\=END_LAT\&end_lng\=END_LNG
+curl -H "Authentication: token" http://localhost:5000/cse115a/us-central1/getPrices\?start_lat\=START_LAT\&start_lng\=START_LNG\&end_lat\=END_LAT\&end_lng\=END_LNG
 ```
 
 Where the parameters of you query are as follows: 
@@ -70,9 +71,9 @@ Where the parameters of you query are as follows:
 All responses will be in the following format: 
 ```json
 {
-    "error": true | false,
-    "status": 200 | 400 | 401 | 500,
-    "message": bodyOfResponse
+    "error": [true, false],
+    "status": [200, 400, 401, 500],
+    "message": "bodyOfResponse"
 }
 ```
 
