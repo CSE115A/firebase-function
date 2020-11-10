@@ -57,7 +57,7 @@ exports.getUberPrices = async ({
       return response.status(500).send({
         error: true,
         status: 500,
-        message: err.response.data,
+        message: `Uber: ${err.response.data}`,
       });
     });
 };

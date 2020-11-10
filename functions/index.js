@@ -7,7 +7,7 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
     startingLatitude: request.query.start_lat,
     startingLongitude: request.query.start_lng,
     endLatitude: request.query.end_lat,
-    // endLongitude: request.query.end_lng,
+    endLongitude: request.query.end_lng,
   };
   const responseBody = {};
   const lyftResponse = await getLyftPrices({
