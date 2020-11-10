@@ -12,17 +12,34 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
   const responseBody = {};
   const lyftResponse = await getLyftPrices({
     functions,
-    response,
     params,
     responseBody,
-  });
+  })
+    .then((res) => {
+      if (res.status === 400) {
+        response.status(400).send({
+          error: true,
+          status: 400,
+          message: res.message,
+        });
+      }
+      responseBody.lyft = res.message;
+      return;
+    })
+    .catch((err) => {
+      response.status(500).send({
+        error: true,
+        status: 500,
+        message: err.message,
+      });
+    });
 
   if (lyftResponse !== undefined) return;
 
-  await getUberPrices({
-    functions,
-    response,
-    params,
-    responseBody,
-  });
+  // await getUberPrices({
+  //   functions,
+  //   response,
+  //   params,
+  //   responseBody,
+  // });
 });

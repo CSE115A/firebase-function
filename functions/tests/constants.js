@@ -33,9 +33,12 @@ const params = {
 
 const responseBody = {};
 
+const request = {};
+
 module.exports = {
   functions,
   responseBody,
   params,
   response,
+  request,
 };

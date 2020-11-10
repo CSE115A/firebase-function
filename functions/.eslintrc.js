@@ -32,6 +32,9 @@ module.exports = {
 
     // Require the use of === and !==
     eqeqeq: 2,
+    
+    // Require using Error objects as Promise rejection reasons
+    "prefer-promise-reject-errors": 2,
 
     // Enforce return statements in callbacks of array methods
     "callback-return": 2,

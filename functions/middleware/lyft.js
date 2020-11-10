@@ -1,11 +1,6 @@
 const axios = require("axios");
 
-exports.getLyftPrices = async ({
-  functions,
-  response,
-  params,
-  responseBody,
-}) => {
+exports.getLyftPrices = async ({ functions, params, responseBody }) => {
   const lyftEndpoint = functions.config().getprices.lyft_endpoint;
   const lyftParams = {
     params: {
@@ -17,7 +12,7 @@ exports.getLyftPrices = async ({
   };
   const lyftConfigHeader = { headers: { Host: "www.lyft.com" } };
 
-  await axios
+  return await axios
     .get(lyftEndpoint, lyftParams, lyftConfigHeader)
     .then((res) => {
       responseBody.lyft = [];
@@ -32,21 +27,19 @@ exports.getLyftPrices = async ({
         };
         responseBody.lyft.push(dataToInput);
       }
-      return;
+      return Promise.resolve({
+        status: 200,
+        message: responseBody,
+      });
     })
     .catch((err) => {
       if (err.response.status === 400) {
-        return response.status(400).send({
-          error: true,
+        return Promise.resolve({
           status: 400,
-          message: "Params for Lyft are missing or are incorrect!",
+          message: "Lyft: Improper Parameters Set",
         });
       } else {
-        return response.status(500).send({
-          error: true,
-          status: 500,
-          message: err.response.data,
-        });
+        return Promise.reject(new Error(`Lyft: ${err.response.data}`));
       }
     });
 };

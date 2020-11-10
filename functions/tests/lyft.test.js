@@ -1,8 +1,9 @@
+/* eslint-disable prefer-promise-reject-errors */
 const axios = require("axios");
 jest.mock("axios");
 const { getLyftPrices } = require("../middleware/lyft");
 const mockConfig = require("firebase-functions-test")();
-const { functions, responseBody, params, response } = require("./constants");
+const { functions, responseBody, params } = require("./constants");
 
 mockConfig.mockConfig({
   getprices: {
@@ -12,31 +13,27 @@ mockConfig.mockConfig({
 });
 
 describe("getLyfPrices Testing Suite", () => {
-  beforeEach(() => {
-    response.status().send({ undefined });
-  });
   describe("when given incorrect params", () => {
     axios.get.mockImplementationOnce(() =>
       Promise.reject({
-        response: { status: 400, message: new Error("Params are missing") },
+        response: {
+          status: 400,
+          message: "Params are missing",
+        },
       }),
     );
 
     it("returns 400 status code with error message", async () => {
-      const params = {
-        startingLongitude: 123,
-        endLongitude: 123,
-        endLatitude: 123,
-      };
+      const params = {};
 
-      await getLyftPrices({ functions, response, params, responseBody });
+      const response = await getLyftPrices({
+        functions,
+        params,
+        responseBody,
+      });
 
-      expect(response.statusCode).toEqual(400);
-      expect(response.body.error).toBeTruthy();
-      expect(response.body.status).toEqual(400);
-      expect(response.body.message).toBe(
-        "Params for Lyft are missing or are incorrect!",
-      );
+      expect(response.status).toEqual(400);
+      expect(response.message).toBe("Lyft: Improper Parameters Set");
     });
   });
   describe("when given correct params", () => {
@@ -57,7 +54,6 @@ describe("getLyfPrices Testing Suite", () => {
     it("returns with a with no errors", async () => {
       await getLyftPrices({
         functions,
-        response,
         params,
         responseBody,
       });
@@ -78,13 +74,9 @@ describe("getLyfPrices Testing Suite", () => {
       }),
     );
     it("correctly displays 500 error message", async () => {
-      await getLyftPrices({ functions, response, params, responseBody });
-      expect(response.statusCode).toEqual(500);
-      expect(response.body.error).toBeTruthy();
-      expect(response.body.status).toEqual(500);
-      expect(response.body.message).toBe(
-        "Server Side Error. Please try again later",
-      );
+      return expect(
+        getLyftPrices({ functions, params, responseBody }),
+      ).rejects.toThrow("Server Side Error. Please try again later");
     });
   });
 });
