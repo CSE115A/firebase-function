@@ -3,7 +3,7 @@ const axios = require("axios");
 jest.mock("axios");
 const { getUberPrices } = require("../middleware/uber");
 const mockConfig = require("firebase-functions-test")();
-const { functions, params, responseBody } = require("./constants");
+const { functions, params } = require("./constants");
 
 mockConfig.mockConfig({
   getprices: {
@@ -13,21 +13,15 @@ mockConfig.mockConfig({
 });
 
 describe("getUberPrices Testing Suite", () => {
-  beforeEach(() => {
-    response.status().send({ undefined });
-  });
-
   describe("when given incorrect params", () => {
     const incorrectResponse = {
       data: { data: {} },
     };
     axios.post.mockImplementationOnce(() => Promise.resolve(incorrectResponse));
     it("returns a 400 error with appropriate fields", async () => {
-      await getUberPrices({ functions, response, params, responseBody });
-      expect(response.statusCode).toEqual(400);
-      expect(response.body.error).toBeTruthy();
-      expect(response.body.status).toEqual(400);
-      expect(response.body.message).toBe("Invalid Uber Params!");
+      const response = await getUberPrices({ functions, params });
+      expect(response.status).toEqual(400);
+      expect(response.message).toBe("Uber: Missing or Invalid Params");
     });
   });
 
@@ -41,31 +35,11 @@ describe("getUberPrices Testing Suite", () => {
     };
     axios.post.mockImplementationOnce(() => Promise.resolve(correctResponse));
     it("returns appropriate 200 response", async () => {
-      responseBody["lyft"] = [
-        {
-          displayName: "Lyft",
-          price: "$10-12",
-        },
-      ];
-      const expectedResponseBody = {
-        lyft: [
-          {
-            displayName: "Lyft",
-            price: "$10-12",
-          },
-        ],
-        uber: [
-          {
-            displayName: "Uber",
-            price: "$10-12",
-          },
-        ],
-      };
-      await getUberPrices({ functions, response, params, responseBody });
-      expect(response.statusCode).toEqual(200);
-      expect(response.body.error).toBeFalsy();
-      expect(response.body.status).toEqual(200);
-      expect(response.body.message).toEqual(expectedResponseBody);
+      const response = await getUberPrices({ functions, params });
+      expect(response.status).toEqual(200);
+      expect(response.message).toStrictEqual([
+        { displayName: "Uber", price: "$10-12" },
+      ]);
     });
   });
 
@@ -76,11 +50,12 @@ describe("getUberPrices Testing Suite", () => {
       }),
     );
     it("returns a 500 error with correctly set fields", async () => {
-      await getUberPrices({ functions, response, params, responseBody });
-      expect(response.statusCode).toEqual(500);
-      expect(response.body.error).toBeTruthy();
-      expect(response.body.status).toEqual(500);
-      expect(response.body.message).toBe("Uber: Missing csrf token");
+      return expect(
+        getUberPrices({
+          functions,
+          params,
+        }),
+      ).rejects.toThrow("Missing csrf token");
     });
   });
 });
