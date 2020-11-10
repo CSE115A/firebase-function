@@ -1,14 +1,13 @@
-const axios = require("axios");
-const { getPrices } = require("../index");
+// const { getPrices } = require("../index");
 const mockConfig = require("firebase-functions-test")();
 
 mockConfig.mockConfig({
   getprices: {
-    uber_endpoint: "https://www.uber.com/api/loadFEEstimates",
-    lyft_endpoint: "https://www.lyft.com/api/costs",
+    uber_endpoint: "www.test.com",
+    lyft_endpoint: "www.test1.com",
   },
 });
-jest.mock("axios");
+
 describe("getPrices Testing Suite", () => {
   it("passed", () => {
     expect(2 + 2).toEqual(4);
