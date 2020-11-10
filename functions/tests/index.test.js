@@ -4,8 +4,10 @@ const mockConfig = require("firebase-functions-test")();
 const { request, response } = require("./constants");
 const { getLyftPrices } = require("../middleware/lyft");
 const { getUberPrices } = require("../middleware/uber");
+const { authenticateToken } = require("../middleware/middleware");
 jest.mock("../middleware/lyft");
 jest.mock("../middleware/uber");
+jest.mock("../middleware/middleware");
 
 mockConfig.mockConfig({
   getprices: {
@@ -18,11 +20,54 @@ describe("getPrices Testing Suite", () => {
   beforeEach(() => {
     response.status().send({ undefined });
   });
+
+  describe("when validating", () => {
+    beforeEach(() => {
+      response.status().send({ undefined });
+    });
+
+    describe("if incorrect token is supplied", () => {
+      authenticateToken.mockImplementationOnce(() => {
+        return {
+          isAuthError: true,
+          authStatusCode: 401,
+          authMessage: "Wrong Token",
+        };
+      });
+      it("returns 401", async () => {
+        await getPrices(request, response);
+        expect(response.statusCode).toEqual(401);
+        expect(response.body.error).toBeTruthy();
+        expect(response.body.status).toEqual(401);
+        expect(response.body.message).toBe("Wrong Token");
+      });
+    });
+    describe("if token is unset in environment", () => {
+      authenticateToken.mockImplementationOnce(() => {
+        return {
+          isAuthError: true,
+          authStatusCode: 400,
+          authMessage: "Unset Env Var",
+        };
+      });
+      it("returns 400 error message with correct fields", async () => {
+        await getPrices(request, response);
+        expect(response.statusCode).toEqual(400);
+        expect(response.body.error).toBeTruthy();
+        expect(response.body.status).toEqual(400);
+        expect(response.body.message).toBe("Unset Env Var");
+      });
+    });
+  });
+
   describe("when given incomplete params", () => {
     beforeEach(() => {
       response.status().send({ undefined });
     });
     describe("when lyft's params are invalid", () => {
+      authenticateToken.mockImplementationOnce(() => {
+        return { isAuthError: false };
+      });
       getLyftPrices.mockImplementationOnce(() =>
         Promise.resolve({
           status: 400,
@@ -43,6 +88,9 @@ describe("getPrices Testing Suite", () => {
     });
 
     describe("when uber's params are invalid", () => {
+      authenticateToken.mockImplementationOnce(() => {
+        return { isAuthError: false };
+      });
       getLyftPrices.mockImplementationOnce(() => Promise.resolve(true));
       getUberPrices.mockImplementationOnce(() =>
         Promise.resolve({ status: 400, message: "Uber: Missing Params" }),
@@ -52,6 +100,10 @@ describe("getPrices Testing Suite", () => {
         request.query = {
           start_lat: 123,
           start_lng: 123,
+        };
+
+        request.headers = {
+          authentication: "token",
         };
 
         await getPrices(request, response);
@@ -64,6 +116,9 @@ describe("getPrices Testing Suite", () => {
   });
 
   describe("when given correct params", () => {
+    authenticateToken.mockImplementationOnce(() => {
+      return { isAuthError: false };
+    });
     getLyftPrices.mockImplementationOnce(() =>
       Promise.resolve({
         status: 200,
@@ -100,6 +155,9 @@ describe("getPrices Testing Suite", () => {
       end_lng: 123,
     };
     describe("with uber", () => {
+      authenticateToken.mockImplementationOnce(() => {
+        return { isAuthError: false };
+      });
       getLyftPrices.mockImplementationOnce(() =>
         Promise.resolve({
           status: 200,
@@ -120,6 +178,9 @@ describe("getPrices Testing Suite", () => {
     });
 
     describe("with Lyft", () => {
+      authenticateToken.mockImplementationOnce(() => {
+        return { isAuthError: false };
+      });
       getLyftPrices.mockImplementationOnce(() =>
         Promise.reject(new Error("Lyft Error")),
       );

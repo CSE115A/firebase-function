@@ -1,28 +1,23 @@
 const axios = require("axios");
 
-exports.getUberPrices = async ({ functions, params }) => {
+exports.getUberPrices = async ({ functions, params, token }) => {
   const uberEndpoint = functions.config().getprices.uber_endpoint;
   const uberParams = {
     destination: {
       latitude: parseFloat(params.endLatitude),
-      locale: "en",
       longitude: parseFloat(params.endLongitude),
-      provider: "google_places",
     },
     locale: "en",
     origin: {
       latitude: parseFloat(params.startingLatitude),
-      locale: "en",
       longitude: parseFloat(params.startingLongitude),
-      provider: "google_places",
     },
   };
   const uberConfigHeaders = {
     headers: {
       "Content-Type": "application/json",
-      "x-csrf-token": "x",
+      "x-csrf-token": `${token}`,
     },
-    params: { localeCode: "en" },
   };
 
   return await axios

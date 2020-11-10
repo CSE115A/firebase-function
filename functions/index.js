@@ -1,8 +1,21 @@
 const functions = require("firebase-functions");
 const { getLyftPrices } = require("./middleware/lyft");
 const { getUberPrices } = require("./middleware/uber");
+const { authenticateToken } = require("./middleware/middleware");
 
 exports.getPrices = functions.https.onRequest(async (request, response) => {
+  const { isAuthError, authStatusCode, authMessage } = authenticateToken(
+    functions,
+    request,
+  );
+  if (isAuthError) {
+    return response.status(authStatusCode).send({
+      error: true,
+      status: authStatusCode,
+      message: authMessage,
+    });
+  }
+
   const params = {
     startingLatitude: request.query.start_lat,
     startingLongitude: request.query.start_lng,
@@ -10,11 +23,7 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
     endLongitude: request.query.end_lng,
   };
   let responseBody = {};
-  const lyftResponse = await getLyftPrices({
-    functions,
-    params,
-    responseBody,
-  })
+  const lyftResponse = await getLyftPrices({ functions, params })
     .then((res) => {
       if (res.status === 400) {
         return response.status(400).send({
@@ -33,13 +42,10 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
         message: err.message,
       });
     });
-  if (lyftResponse) return;
+  if (lyftResponse) return response;
 
-  const uberResponse = await getUberPrices({
-    functions,
-    params,
-    responseBody,
-  })
+  const token = request.headers.authentication;
+  const uberResponse = await getUberPrices({ functions, params, token })
     .then((res) => {
       if (res.status === 400) {
         return response.status(400).send({
@@ -59,12 +65,12 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
       });
     });
 
-  if (uberResponse) return;
+  if (uberResponse) return response;
 
   response.status(200).send({
     error: false,
     status: 200,
     message: responseBody,
   });
-  return;
+  return response;
 });

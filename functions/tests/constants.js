@@ -4,6 +4,7 @@ const functions = {
       getprices: {
         uber_endpoint: "www.test.com",
         lyft_endpoint: "www.test1.com",
+        auth_token: "token",
       },
     };
   },
