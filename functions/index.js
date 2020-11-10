@@ -38,7 +38,6 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
 
   // await getUberPrices({
   //   functions,
-  //   response,
   //   params,
   //   responseBody,
   // });

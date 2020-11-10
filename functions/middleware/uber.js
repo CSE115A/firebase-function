@@ -1,11 +1,6 @@
 const axios = require("axios");
 
-exports.getUberPrices = async ({
-  functions,
-  response,
-  params,
-  responseBody,
-}) => {
+exports.getUberPrices = async ({ functions, params, responseBody }) => {
   const uberEndpoint = functions.config().getprices.uber_endpoint;
   const uberParams = {
     destination: {
@@ -30,15 +25,14 @@ exports.getUberPrices = async ({
     params: { localeCode: "en" },
   };
 
-  await axios
+  return await axios
     .post(uberEndpoint, uberParams, uberConfigHeaders)
     .then((res) => {
       const data = res.data.data.prices;
       if (data === undefined) {
-        return response.status(400).send({
-          error: true,
+        return Promise.resolve({
           status: 400,
-          message: "Invalid Uber Params!",
+          message: "Uber: Missing or Invalid Params",
         });
       }
       responseBody.uber = [];
@@ -49,9 +43,7 @@ exports.getUberPrices = async ({
         };
         responseBody.uber.push(dataToInput);
       }
-      return response
-        .status(200)
-        .send({ error: false, status: 200, message: responseBody });
+      return Promise.resolve;
     })
     .catch((err) => {
       return response.status(500).send({

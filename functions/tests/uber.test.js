@@ -1,8 +1,9 @@
+/* eslint-disable prefer-promise-reject-errors */
 const axios = require("axios");
 jest.mock("axios");
 const { getUberPrices } = require("../middleware/uber");
 const mockConfig = require("firebase-functions-test")();
-const { functions, response, params, responseBody } = require("./constants");
+const { functions, params, responseBody } = require("./constants");
 
 mockConfig.mockConfig({
   getprices: {

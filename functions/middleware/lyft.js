@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-exports.getLyftPrices = async ({ functions, params, responseBody }) => {
+exports.getLyftPrices = async ({ functions, params }) => {
   const lyftEndpoint = functions.config().getprices.lyft_endpoint;
   const lyftParams = {
     params: {
@@ -15,7 +15,7 @@ exports.getLyftPrices = async ({ functions, params, responseBody }) => {
   return await axios
     .get(lyftEndpoint, lyftParams, lyftConfigHeader)
     .then((res) => {
-      responseBody.lyft = [];
+      const lyft = [];
       const costEstimates = res.data.cost_estimates;
       for (cost in costEstimates) {
         let item = costEstimates[cost];
@@ -25,11 +25,11 @@ exports.getLyftPrices = async ({ functions, params, responseBody }) => {
             item.estimated_cost_cents_max / 100
           }`,
         };
-        responseBody.lyft.push(dataToInput);
+        lyft.push(dataToInput);
       }
       return Promise.resolve({
         status: 200,
-        message: responseBody,
+        message: lyft,
       });
     })
     .catch((err) => {

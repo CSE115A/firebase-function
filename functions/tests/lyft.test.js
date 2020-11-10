@@ -52,15 +52,12 @@ describe("getLyfPrices Testing Suite", () => {
       Promise.resolve(lyftEndpointResponse),
     );
     it("returns with a with no errors", async () => {
-      await getLyftPrices({
-        functions,
-        params,
-        responseBody,
-      });
+      const response = await getLyftPrices({ functions, params });
 
-      expect(responseBody).toEqual({
-        lyft: [{ displayName: "Lyft", price: "$10-12" }],
-      });
+      expect(response.message).toEqual([
+        { displayName: "Lyft", price: "$10-12" },
+      ]);
+      expect(response.status).toEqual(200);
     });
   });
 
