@@ -77,6 +77,24 @@ All responses will be in the following format:
 }
 ```
 
+#### Internal Server Error
+```json
+{
+    "error": true, 
+    "status": 500,
+    "message": "Env Vars Not Set!"
+}
+```
+
+#### Not Authorized Call
+```json
+{
+    "error": true, 
+    "status": 401,
+    "message": "Request is not authorized"
+}
+```
+
 #### Error with Lyft Call 
 
 ```json 

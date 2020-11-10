@@ -46,15 +46,15 @@ describe("getPrices Testing Suite", () => {
       authenticateToken.mockImplementationOnce(() => {
         return {
           isAuthError: true,
-          authStatusCode: 400,
+          authStatusCode: 500,
           authMessage: "Unset Env Var",
         };
       });
-      it("returns 400 error message with correct fields", async () => {
+      it("returns 500 error message with correct fields", async () => {
         await getPrices(request, response);
-        expect(response.statusCode).toEqual(400);
+        expect(response.statusCode).toEqual(500);
         expect(response.body.error).toBeTruthy();
-        expect(response.body.status).toEqual(400);
+        expect(response.body.status).toEqual(500);
         expect(response.body.message).toBe("Unset Env Var");
       });
     });

@@ -4,7 +4,7 @@ exports.authenticateToken = (functions, requestObject) => {
   if (correctKey === undefined) {
     return {
       isAuthError: true,
-      authStatusCode: 400,
+      authStatusCode: 500,
       authMessage: "ERROR: UNSET API KEY ENV VAR",
     };
   }

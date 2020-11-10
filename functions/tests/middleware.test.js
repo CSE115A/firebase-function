@@ -29,7 +29,7 @@ describe("authenticateToken Testing Suite", () => {
         return functionObjToErr;
       },
     };
-    it("returns 400 error", () => {
+    it("returns 500 error", () => {
       request.headers = {
         authentication: "key",
       };
@@ -38,7 +38,7 @@ describe("authenticateToken Testing Suite", () => {
         request,
       );
       expect(isAuthError).toBeTruthy();
-      expect(authStatusCode).toEqual(400);
+      expect(authStatusCode).toEqual(500);
       expect(authMessage).toBe("ERROR: UNSET API KEY ENV VAR");
     });
   });
