@@ -7,7 +7,7 @@ exports.getPrices = functions.https.onRequest(async (request, response) => {
   response.set({ "Access-Control-Allow-Origin": "*" });
   if (request.method === "OPTIONS") {
     response.set("Access-Control-Allow-Headers", "authentication");
-    response.status(200).send("");
+    return response.status(200).send("");
   } else {
     const { isAuthError, authStatusCode, authMessage } = authenticateToken(
       functions,
