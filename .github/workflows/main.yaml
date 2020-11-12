@@ -56,6 +56,8 @@ jobs:
             cd functions
             yarn install --frozen-lockfile
       - name: Deploying to Firebase 
-        run: yarn deploy --token $token 
+        run: |
+            cd functions
+            yarn deploy --token $token 
         env: 
           token: ${{ secrets.FIREBASE_TOKEN }}
