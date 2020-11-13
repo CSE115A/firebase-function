@@ -23,6 +23,7 @@ const response = {
     };
     return response;
   },
+  set: () => {},
 };
 
 const params = {
